@@ -72,3 +72,34 @@ document.addEventListener('DOMContentLoaded', () => {
     showRandomQuote();
     createAddQuoteForm();
 });
+
+
+
+// Function to save quotes to local storage
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+// Load quotes from local storage if available
+document.addEventListener('DOMContentLoaded', () => {
+    const storedQuotes = localStorage.getItem('quotes');
+    if (storedQuotes) {
+        quotes.push(...JSON.parse(storedQuotes));
+    }
+    showRandomQuote();
+});
+
+// Modify the addQuote function to save quotes to local storage
+function addQuote() {
+    const newQuoteText = document.getElementById('newQuoteText').value;
+    const newQuoteCategory = document.getElementById('newQuoteCategory').value;
+    if (newQuoteText && newQuoteCategory) {
+        quotes.push({ text: newQuoteText, category: newQuoteCategory });
+        saveQuotes();
+        alert('Quote added successfully!');
+        document.getElementById('newQuoteText').value = '';
+        document.getElementById('newQuoteCategory').value = '';
+    } else {
+        alert('Please enter both quote text and category.');
+    }
+}
