@@ -1,3 +1,5 @@
+const serverUrl = 'https://jsonplaceholder.typicode.com/posts'; // Replace with your server endpoint
+
 // Array to hold quote objects
 let quotes = [
     { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivational" },
@@ -119,8 +121,9 @@ async function syncQuotes() {
         const response = await fetch(serverUrl);
         const serverQuotes = await response.json();
 
-        // Merge server quotes with local quotes
-        const combinedQuotes = [...new Set([...serverQuotes, ...quotes])];
+        // Convert server quotes to desired format and merge with local quotes
+        const formattedServerQuotes = serverQuotes.map(post => ({ text: post.body, category: 'Server' }));
+        const combinedQuotes = mergeQuotes(formattedServerQuotes, quotes);
 
         // Update local storage and display
         quotes = combinedQuotes;
@@ -133,6 +136,22 @@ async function syncQuotes() {
     } catch (error) {
         console.error('Error syncing data with server:', error);
     }
+}
+
+// Function to merge server and local quotes, resolving conflicts
+function mergeQuotes(serverQuotes, localQuotes) {
+    const allQuotes = [...serverQuotes, ...localQuotes];
+    const uniqueQuotes = [];
+    const seen = new Set();
+
+    allQuotes.forEach(quote => {
+        if (!seen.has(quote.text)) {
+            uniqueQuotes.push(quote);
+            seen.add(quote.text);
+        }
+    });
+
+    return uniqueQuotes;
 }
 
 // Function to show notifications
@@ -166,42 +185,3 @@ document.getElementById('categoryFilter').addEventListener('change', () => {
     localStorage.setItem('selectedCategory', selectedCategory);
     filterQuotes();
 });
-
-
-
-
-////////////////
-
-async function fetchQuotesFromServer() {
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // Replace with your server endpoint
-    const serverQuotes = await response.json();
-    quotes.push(...serverQuotes.map(post => ({ text: post.body, category: 'Server' })));
-    saveQuotes();
-    filterQuotes();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const storedQuotes = localStorage.getItem('quotes');
-    if (storedQuotes) {
-        quotes.push(...JSON.parse(storedQuotes));
-    }
-    populateCategoryFilter();
-    filterQuotes();
-    fetchQuotesFromServer();
-});
-
-
-
-//////////////////////
-
-async function fetchQuotesFromServer() {
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // Replace with your server endpoint
-    const serverQuotes = await response.json();
-    const newQuotes = serverQuotes.map(post => ({ text: post.body, category: 'Server' }));
-    quotes.length = 0; // Clear existing quotes
-    quotes.push(...newQuotes);
-    saveQuotes();
-    filterQuotes();
-    alert('Quotes synchronized with server.');
-}
-
