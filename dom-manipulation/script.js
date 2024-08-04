@@ -18,9 +18,11 @@ function addQuote() {
     const newQuoteCategory = document.getElementById('newQuoteCategory').value;
     if (newQuoteText && newQuoteCategory) {
         quotes.push({ text: newQuoteText, category: newQuoteCategory });
+        saveQuotes();
         alert('Quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
+        updateQuotesDisplay();
     } else {
         alert('Please enter both quote text and category.');
     }
@@ -28,3 +30,33 @@ function addQuote() {
 
 // Event listener for the 'Show New Quote' button
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+
+// Function to save quotes to local storage
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+// Function to load quotes from local storage
+function loadQuotes() {
+    const storedQuotes = localStorage.getItem('quotes');
+    if (storedQuotes) {
+        quotes.push(...JSON.parse(storedQuotes));
+    }
+}
+
+// Function to update the display of quotes
+function updateQuotesDisplay() {
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    quoteDisplay.innerHTML = '';
+    quotes.forEach(quote => {
+        const quoteElement = document.createElement('div');
+        quoteElement.innerText = `${quote.text} - ${quote.category}`;
+        quoteDisplay.appendChild(quoteElement);
+    });
+}
+
+// Load quotes from local storage on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuotes();
+    showRandomQuote();
+});
