@@ -19,8 +19,10 @@ function addQuote() {
     const newQuoteText = document.getElementById('newQuoteText').value;
     const newQuoteCategory = document.getElementById('newQuoteCategory').value;
     if (newQuoteText && newQuoteCategory) {
-        quotes.push({ text: newQuoteText, category: newQuoteCategory });
+        const newQuote = { text: newQuoteText, category: newQuoteCategory };
+        quotes.push(newQuote);
         saveQuotes();
+        postQuoteToServer(newQuote);
         alert('Quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
@@ -152,6 +154,37 @@ function mergeQuotes(serverQuotes, localQuotes) {
     });
 
     return uniqueQuotes;
+}
+
+// Function to fetch quotes from the server
+async function fetchQuotesFromServer() {
+    try {
+        const response = await fetch(serverUrl);
+        const serverQuotes = await response.json();
+        const formattedServerQuotes = serverQuotes.map(post => ({ text: post.body, category: 'Server' }));
+        quotes.push(...formattedServerQuotes);
+        saveQuotes();
+        filterQuotes();
+        alert('Quotes synchronized with server.');
+    } catch (error) {
+        console.error('Error fetching quotes from server:', error);
+    }
+}
+
+// Function to post a new quote to the server
+async function postQuoteToServer(newQuote) {
+    try {
+        await fetch(serverUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newQuote)
+        });
+        showNotification('Quote posted to server');
+    } catch (error) {
+        console.error('Error posting quote to server:', error);
+    }
 }
 
 // Function to show notifications
