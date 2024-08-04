@@ -27,7 +27,7 @@ function addQuote() {
         document.getElementById('newQuoteCategory').value = '';
         updateQuotesDisplay();
         populateCategoryFilter(); // Update the category filter when a new quote is added
-        syncWithServer(); // Sync with server after adding a quote
+        syncQuotes(); // Sync with server after adding a quote
     } else {
         alert('Please enter both quote text and category.');
     }
@@ -80,7 +80,7 @@ function importFromJsonFile(event) {
         alert('Quotes imported successfully!');
         updateQuotesDisplay();
         populateCategoryFilter();
-        syncWithServer(); // Sync with server after importing quotes
+        syncQuotes(); // Sync with server after importing quotes
     };
     fileReader.readAsText(event.target.files[0]);
 }
@@ -114,39 +114,26 @@ function filterQuotes() {
     updateQuotesDisplay(filteredQuotes);
 }
 
-// Syncing with the server
-async function syncWithServer() {
+// Function to sync quotes with server and handle conflicts
+async function syncQuotes() {
     try {
-        const response = await fetch(serverUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(quotes)
-        });
-        if (response.ok) {
-            console.log('Data synced with server');
-        }
-    } catch (error) {
-        console.error('Error syncing data with server:', error);
-    }
-}
-
-// Function to fetch quotes from the server
-async function fetchQuotesFromServer() {
-    try {
+        // Fetch current quotes from the server
         const response = await fetch(serverUrl);
         const serverQuotes = await response.json();
-        const localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
-        if (JSON.stringify(localQuotes) !== JSON.stringify(serverQuotes)) {
-            quotes = serverQuotes;
-            saveQuotes();
-            updateQuotesDisplay();
-            populateCategoryFilter();
-            showNotification('Quotes updated from server');
-        }
+
+        // Merge server quotes with local quotes
+        const combinedQuotes = [...new Set([...serverQuotes, ...quotes])];
+
+        // Update local storage and display
+        quotes = combinedQuotes;
+        saveQuotes();
+        updateQuotesDisplay();
+        populateCategoryFilter();
+
+        // Notify user of sync
+        showNotification('Quotes synced with server');
     } catch (error) {
-        console.error('Error fetching data from server:', error);
+        console.error('Error syncing data with server:', error);
     }
 }
 
@@ -171,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         updateQuotesDisplay();
     }
-    // Periodic fetching of quotes from server
-    setInterval(fetchQuotesFromServer, 5000); // Fetch data every 5 seconds
+    // Periodic syncing with server
+    setInterval(syncQuotes, 5000); // Sync data every 5 seconds
 });
 
 // Save selected category to local storage
