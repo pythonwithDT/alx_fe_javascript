@@ -73,3 +73,46 @@ document.addEventListener('DOMContentLoaded', () => {
     createAddQuoteForm();
     updateQuotesDisplay();
 });
+
+
+//////////////////////////////////////
+
+
+// Function to export quotes to a JSON file
+function exportQuotes() {
+    const dataStr = JSON.stringify(quotes, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'quotes.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Event listener for the 'Export Quotes' button
+document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
+
+
+
+
+///////////////////////////////////////////////////
+
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        const importedQuotes = JSON.parse(event.target.result);
+        quotes.push(...importedQuotes);
+        saveQuotes();
+        alert('Quotes imported successfully!');
+        updateQuotesDisplay();
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
+// Event listener for the 'Import Quotes' file input
+document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+
+
