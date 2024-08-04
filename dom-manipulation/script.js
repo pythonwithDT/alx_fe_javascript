@@ -23,7 +23,7 @@ function addQuote() {
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
         updateQuotesDisplay();
-        populateCategoryFilter(); // Update the category filter when a new quote is added
+        populateCategories(); // Update the category filter when a new quote is added
         syncQuotes(); // Sync with server after adding a quote
     } else {
         alert('Please enter both quote text and category.');
@@ -76,7 +76,7 @@ function importFromJsonFile(event) {
         saveQuotes();
         alert('Quotes imported successfully!');
         updateQuotesDisplay();
-        populateCategoryFilter();
+        populateCategories();
         syncQuotes(); // Sync with server after importing quotes
     };
     fileReader.readAsText(event.target.files[0]);
@@ -89,7 +89,7 @@ document.getElementById('importFile').addEventListener('change', importFromJsonF
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
 
 // Function to populate category filter
-function populateCategoryFilter() {
+function populateCategories() {
     const categories = new Set(quotes.map(quote => quote.category));
     const categoryFilter = document.getElementById('categoryFilter');
     categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
@@ -126,7 +126,7 @@ async function syncQuotes() {
         quotes = combinedQuotes;
         saveQuotes();
         updateQuotesDisplay();
-        populateCategoryFilter();
+        populateCategories();
 
         // Notify user of sync
         showNotification('Quotes synced with server');
@@ -148,7 +148,7 @@ function showNotification(message) {
 document.addEventListener('DOMContentLoaded', () => {
     loadQuotes();
     showRandomQuote();
-    populateCategoryFilter();
+    populateCategories();
     const savedCategory = localStorage.getItem('selectedCategory');
     if (savedCategory) {
         document.getElementById('categoryFilter').value = savedCategory;
