@@ -166,3 +166,42 @@ document.getElementById('categoryFilter').addEventListener('change', () => {
     localStorage.setItem('selectedCategory', selectedCategory);
     filterQuotes();
 });
+
+
+
+
+////////////////
+
+async function fetchQuotesFromServer() {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // Replace with your server endpoint
+    const serverQuotes = await response.json();
+    quotes.push(...serverQuotes.map(post => ({ text: post.body, category: 'Server' })));
+    saveQuotes();
+    filterQuotes();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const storedQuotes = localStorage.getItem('quotes');
+    if (storedQuotes) {
+        quotes.push(...JSON.parse(storedQuotes));
+    }
+    populateCategoryFilter();
+    filterQuotes();
+    fetchQuotesFromServer();
+});
+
+
+
+//////////////////////
+
+async function fetchQuotesFromServer() {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // Replace with your server endpoint
+    const serverQuotes = await response.json();
+    const newQuotes = serverQuotes.map(post => ({ text: post.body, category: 'Server' }));
+    quotes.length = 0; // Clear existing quotes
+    quotes.push(...newQuotes);
+    saveQuotes();
+    filterQuotes();
+    alert('Quotes synchronized with server.');
+}
+
